@@ -9967,17 +9967,6 @@ action:
                             continue_on_error: true
 
                           ##### Display weather data only when available #####
-                          - variables:
-                              weather_entity_supported_features: '{{ state_attr(weather_entity, "supported_features") | int(0) }}'
-                              forecast_type: >
-                                {% if weather_entity_supported_features == 0 or weather_entity_supported_features | bitwise_and(1) > 0 %}
-                                  daily
-                                {% elif weather_entity_supported_features | bitwise_and(4) > 0 %}
-                                  twice_daily
-                                {% elif weather_entity_supported_features | bitwise_and(2) > 0 %}
-                                  hourly
-                                {% endif %}
-                          - condition: '{{ forecast_type in ["daily", "twice_daily", "hourly"] }}'
                           - service: 'weather.get_forecasts'
                             target:
                               entity_id: '{{ weather_entity }}'
@@ -9987,16 +9976,7 @@ action:
                             continue_on_error: true
                           - variables:
                               forecast: >
-                                {% if service_response_var is defined
-                                      and service_response_var[weather_entity] is defined
-                                      and service_response_var[weather_entity].forecast is defined %}
                                   {{ service_response_var[weather_entity].forecast }}
-                                {% elif service_response_var is defined and service_response_var.forecast is defined %}
-                                  {{ service_response_var.forecast }}
-                                {% else %}
-                                  {{ state_attr(weather_entity, "forecast") | default(false) }}
-                                {% endif %}
-                          - condition: '{{ forecast != false }}'
                           - variables:
                               datetime_is_string: '{{ forecast[0] is defined and forecast[0]["datetime"] is string }}'
                               forecast_day: >
